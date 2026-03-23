@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3-Symbol Tic Tac Toe - 5x5</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Instructions Page */
+        .instructions-page h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5em;
+        }
+
+        .instructions-page .content {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .instructions-page h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            margin-top: 20px;
+        }
+
+        .instructions-page h2:first-child {
+            margin-top: 0;
+        }
+
+        .instructions-page p, .instructions-page li {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .instructions-page ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .instructions-page li {
+            margin-bottom: 8px;
+        }
+
+        .board-size-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 15px 0;
+            font-size: 1.1em;
+        }
+
+        .symbol-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 20px 0;
+            border-top: 2px solid #ddd;
+            border-bottom: 2px solid #ddd;
+        }
+
+        .symbol-box {
+            text-align: center;
+        }
+
+        .symbol-display {
+            font-size: 3em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .x-symbol {
+            color: #667eea;
+        }
+
+        .o-symbol {
+            color: #764ba2;
+        }
+
+        .z-symbol {
+            color: #ff9f43;
+        }
+
+        .symbol-label {
+            color: #555;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .symbol-sublabel {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .game-flow {
+            background: #e8f4f8;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .game-flow strong {
+            color: #667eea;
+        }
+
+        .winning-conditions {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 20px 0;
+        }
+
+        .winning-conditions h3 {
+            color: #ff9f43;
+            margin-bottom: 10px;
+        }
+
+        .win-condition {
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .win-condition strong {
+            color: #764ba2;
+        }
+
+        .advantage-box {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 15px 0;
+        }
+
+        .advantage-box strong {
+            color: #28a745;
+        }
+
+        /* Game Page */
+        .game-page h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid;
+        }
+
+        .info-box.turn {
+            border-left-color: #667eea;
+        }
+
+        .info-box.status {
+            border-left-color: #764ba2;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            color: #999;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .info-value.player {
+            color: #667eea;
+        }
+
+        .info-value.o {
+            color: #764ba2;
+        }
+
+        .info-value.z {
+            color: #ff9f43;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-gap: 5px;
+            background: #ddd;
+            padding: 5px;
+            border-radius: 10px;
+            width: fit-content;
+        }
+
+        .cell {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell:hover:not(:disabled) {
+            background: #f0f0f0;
+            transform: scale(0.95);
+        }
+
+        .cell:disabled {
+            cursor: not-allowed;
+        }
+
+        .cell.x {
+            color: #667eea;
+        }
+
+        .cell.o {
+            color: #764ba2;
+        }
+
+        .cell.z {
+            color: #ff9f43;
+        }
+
+        .game-message {
+            text-align: center;
+            color: #764ba2;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            min-height: 25px;
+        }
+
+        /* Results Page */
+        .results-page {
+            text-align: center;
+        }
+
+        .results-page h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .result-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .result-message {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .result-message.win {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .result-message.lose {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .result-message.draw {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .result-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #555;
+        }
+
+        .result-details p {
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .winning-combo {
+            color: #764ba2;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .final-board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-gap: 5px;
+            background: #ddd;
+            padding: 5px;
+            border-radius: 10px;
+            margin: 30px auto;
+            width: fit-content;
+        }
+
+        .final-cell {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #667eea;
+        }
+
+        .final-cell.o {
+            color: #764ba2;
+        }
+
+        .final-cell.z {
+            color: #ff9f43;
+        }
+
+        .final-cell.winning {
+            background: #fff9e6;
+            box-shadow: 0 0 10px rgba(255, 159, 67, 0.5);
+            border: 2px solid #ff9f43;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1.05em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e9ecef;
+            color: #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #dee2e6;
+            transform: translateY(-2px);
+        }
+
+        .btn-reset {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .instructions-page h1, .game-page h1, .results-page h1 {
+                font-size: 1.8em;
+            }
+
+            .symbol-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .game-info {
+                grid-template-columns: 1fr;
+            }
+
+            .cell {
+                width: 70px;
+                height: 70px;
+                font-size: 1.8em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+
+            .cell {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+
+            .board-size-badge {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Instructions Page -->
+        <div class="page active" id="instructions-page">
+            <div class="instructions-page">
+                <h1>🎮 3-Symbol Tic Tac Toe</h1>
+                <div class="content">
+                    <h2>Welcome to the Challenge!</h2>
+                    <p>This is an advanced version of Tic Tac Toe where you'll face a more challenging opponent on an expanded board. The System controls two symbols and will play strategically against you!</p>
+
+                    <div class="board-size-badge">📐 Board Size: 5×5 Grid (25 Cells)</div>
+
+                    <h2>The Players</h2>
+                    <div class="symbol-info">
+                        <div class="symbol-box">
+                            <div class="symbol-display x-symbol">X</div>
+                            <div class="symbol-label">You (Player)</div>
+                            <div class="symbol-sublabel">Your turn 1st</div>
+                        </div>
+                        <div class="symbol-box">
+                            <div class="symbol-display o-symbol">O</div>
+                            <div class="symbol-label">System</div>
+                            <div class="symbol-sublabel">Turns 2 & 4 & 6...</div>
+                        </div>
+                        <div class="symbol-box">
+                            <div class="symbol-display z-symbol">Z</div>
+                            <div class="symbol-label">System</div>
+                            <div class="symbol-sublabel">Turns 3 & 5 & 7...</div>
+                        </div>
+                    </div>
+
+                    <div class="game-flow">
+                        <strong>Turn Order:</strong><br>
+                        1️⃣ X (You) → 2️⃣ O (System) → 3️⃣ Z (System) → 4️⃣ X (You) → ...
+                    </div>
+
+                    <div class="advantage-box">
+                        <strong>✅ Your Advantage:</strong> With a 5×5 board and playing first, you have significantly more space to build winning combinations and defend against the System's dual symbols!
+                    </div>
+
+                    <h2>How to Play</h2>
+                    <ul>
+                        <li>Click on any empty cell to make your move with <strong>X</strong></li>
+                        <li>The System will automatically alternate between <strong>O</strong> and <strong>Z</strong></li>
+                        <li>The System plays strategically to win while defending against you</li>
+                        <li>Get three X's in a row (horizontal, vertical, or diagonal) to win!</li>
+                        <li>The larger board gives you more opportunities to outmaneuver the System</li>
+                    </ul>
+
+                    <div class="winning-conditions">
+                        <h3>⭐ Winning Conditions</h3>
+                        <div class="win-condition">
+                            <strong>You Win:</strong> Get three X's in a straight line (horizontally, vertically, or diagonally) anywhere on the 5×5 board before the System gets three O's or three Z's in a line.
+                        </div>
+                        <div class="win-condition">
+                            <strong>System Wins:</strong> Either O or Z gets three in a row at any point in the game.
+                        </div>
+                        <div class="win-condition">
+                            <strong>Draw:</strong> The board fills up (25 moves) with no winner.
+                        </div>
+                    </div>
+
+                    <h2>Strategy Tips</h2>
+                    <ul>
+                        <li>🎯 <strong>Control the center:</strong> The middle area is strategic for building winning combinations</li>
+                        <li>🛡️ <strong>Balance offense and defense:</strong> Build your own winning positions while blocking the System</li>
+                        <li>📍 <strong>Use the extra space:</strong> The 5×5 board gives you room to maneuver that wasn't available in traditional tic-tac-toe</li>
+                        <li>🔄 <strong>Think ahead:</strong> The System plays both O and Z optimally, so plan multiple moves ahead</li>
+                        <li>💪 <strong>You can win:</strong> Unlike the 3×3 version, the 5×5 board with optimal play gives the first player (you) a real chance to win!</li>
+                    </ul>
+                </div>
+                <div class="button-group">
+                    <button class="btn-primary" onclick="startGame()">Start Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Page -->
+        <div class="page" id="game-page">
+            <div class="game-page">
+                <h1>🎮 3-Symbol Tic Tac Toe (5×5)</h1>
+                <div class="game-info">
+                    <div class="info-box turn">
+                        <div class="info-label">Current Turn</div>
+                        <div class="info-value player" id="current-turn">Your Move (X)</div>
+                    </div>
+                    <div class="info-box status">
+                        <div class="info-label">Move Count</div>
+                        <div class="info-value" id="game-status">0</div>
+                    </div>
+                </div>
+                <div class="game-message" id="game-message"></div>
+                <div class="board-container">
+                    <div class="board" id="board">
+                        <button class="cell" data-index="0"></button>
+                        <button class="cell" data-index="1"></button>
+                        <button class="cell" data-index="2"></button>
+                        <button class="cell" data-index="3"></button>
+                        <button class="cell" data-index="4"></button>
+                        <button class="cell" data-index="5"></button>
+                        <button class="cell" data-index="6"></button>
+                        <button class="cell" data-index="7"></button>
+                        <button class="cell" data-index="8"></button>
+                        <button class="cell" data-index="9"></button>
+                        <button class="cell" data-index="10"></button>
+                        <button class="cell" data-index="11"></button>
+                        <button class="cell" data-index="12"></button>
+                        <button class="cell" data-index="13"></button>
+                        <button class="cell" data-index="14"></button>
+                        <button class="cell" data-index="15"></button>
+                        <button class="cell" data-index="16"></button>
+                        <button class="cell" data-index="17"></button>
+                        <button class="cell" data-index="18"></button>
+                        <button class="cell" data-index="19"></button>
+                        <button class="cell" data-index="20"></button>
+                        <button class="cell" data-index="21"></button>
+                        <button class="cell" data-index="22"></button>
+                        <button class="cell" data-index="23"></button>
+                        <button class="cell" data-index="24"></button>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="goBack()">Back to Instructions</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Page -->
+        <div class="page" id="results-page">
+            <div class="results-page">
+                <h1>Game Over!</h1>
+                <div class="result-box" id="result-box">Result</div>
+                <div class="result-message" id="result-message"></div>
+                <div class="result-details" id="result-details"></div>
+                <div class="final-board" id="final-board"></div>
+                <div class="button-group">
+                    <button class="btn-reset" onclick="playAgain()">Play Again</button>
+                    <button class="btn-secondary" onclick="backToInstructions()">Back to Instructions</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game constants
+        const GRID_SIZE = 5;
+        const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
+        const WIN_LENGTH = 3;
+
+        // Game state
+        let gameBoard = Array(TOTAL_CELLS).fill('');
+        let currentPlayer = 'X'; // X = Player, O/Z = System
+        let moveCount = 0;
+        let gameActive = true;
+        let gameResult = null;
+        let winningCombo = null;
+
+        // Generate all possible winning combinations for 5x5 grid
+        function generateWinningCombinations() {
+            const combos = [];
+
+            // Horizontal lines
+            for (let row = 0; row < GRID_SIZE; row++) {
+                for (let col = 0; col <= GRID_SIZE - WIN_LENGTH; col++) {
+                    const combo = [];
+                    for (let i = 0; i < WIN_LENGTH; i++) {
+                        combo.push(row * GRID_SIZE + col + i);
+                    }
+                    combos.push(combo);
+                }
+            }
+
+            // Vertical lines
+            for (let col = 0; col < GRID_SIZE; col++) {
+                for (let row = 0; row <= GRID_SIZE - WIN_LENGTH; row++) {
+                    const combo = [];
+                    for (let i = 0; i < WIN_LENGTH; i++) {
+                        combo.push((row + i) * GRID_SIZE + col);
+                    }
+                    combos.push(combo);
+                }
+            }
+
+            // Diagonal lines (top-left to bottom-right)
+            for (let row = 0; row <= GRID_SIZE - WIN_LENGTH; row++) {
+                for (let col = 0; col <= GRID_SIZE - WIN_LENGTH; col++) {
+                    const combo = [];
+                    for (let i = 0; i < WIN_LENGTH; i++) {
+                        combo.push((row + i) * GRID_SIZE + (col + i));
+                    }
+                    combos.push(combo);
+                }
+            }
+
+            // Diagonal lines (top-right to bottom-left)
+            for (let row = 0; row <= GRID_SIZE - WIN_LENGTH; row++) {
+                for (let col = WIN_LENGTH - 1; col < GRID_SIZE; col++) {
+                    const combo = [];
+                    for (let i = 0; i < WIN_LENGTH; i++) {
+                        combo.push((row + i) * GRID_SIZE + (col - i));
+                    }
+                    combos.push(combo);
+                }
+            }
+
+            return combos;
+        }
+
+        const winningCombinations = generateWinningCombinations();
+
+        // Initialize game
+        function startGame() {
+            gameBoard = Array(TOTAL_CELLS).fill('');
+            currentPlayer = 'X';
+            moveCount = 0;
+            gameActive = true;
+            gameResult = null;
+            winningCombo = null;
+            
+            showPage('game-page');
+            renderBoard();
+            updateGameInfo();
+        }
+
+        // Get current system player (O or Z based on move count)
+        function getSystemPlayer() {
+            if (moveCount % 3 === 1) return 'O';
+            if (moveCount % 3 === 2) return 'Z';
+            return 'O';
+        }
+
+        // Render the board
+        function renderBoard() {
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach((cell, index) => {
+                cell.textContent = gameBoard[index];
+                cell.className = 'cell';
+                
+                if (gameBoard[index] === 'X') {
+                    cell.classList.add('x');
+                } else if (gameBoard[index] === 'O') {
+                    cell.classList.add('o');
+                } else if (gameBoard[index] === 'Z') {
+                    cell.classList.add('z');
+                }
+                
+                if (gameActive && currentPlayer === 'X') {
+                    cell.onclick = () => playerMove(index);
+                } else {
+                    cell.onclick = null;
+                }
+            });
+        }
+
+        // Player move
+        function playerMove(index) {
+            if (gameBoard[index] === '' && gameActive && currentPlayer === 'X') {
+                gameBoard[index] = 'X';
+                moveCount++;
+                
+                // Check if player won
+                if (checkWinner('X')) {
+                    endGame('X');
+                    return;
+                }
+                
+                if (isBoardFull()) {
+                    endGame('Draw');
+                    return;
+                }
+                
+                // System's turn - O
+                currentPlayer = 'O';
+                updateGameInfo();
+                renderBoard();
+                document.getElementById('game-message').textContent = 'System (O) is thinking...';
+                
+                setTimeout(() => {
+                    systemMoveO();
+                }, 600);
+            }
+        }
+
+        // System move - O
+        function systemMoveO() {
+            const bestMove = getBestMove('O', 'Z');
+            
+            if (bestMove !== -1) {
+                gameBoard[bestMove] = 'O';
+                moveCount++;
+                
+                // Check if System won with O
+                if (checkWinner('O')) {
+                    endGame('O');
+                    return;
+                }
+                
+                if (isBoardFull()) {
+                    endGame('Draw');
+                    return;
+                }
+                
+                // System's turn - Z
+                currentPlayer = 'Z';
+                updateGameInfo();
+                renderBoard();
+                document.getElementById('game-message').textContent = 'System (Z) is thinking...';
+                
+                setTimeout(() => {
+                    systemMoveZ();
+                }, 600);
+            }
+        }
+
+        // System move - Z
+        function systemMoveZ() {
+            const bestMove = getBestMove('Z', 'O');
+            
+            if (bestMove !== -1) {
+                gameBoard[bestMove] = 'Z';
+                moveCount++;
+                
+                // Check if System won with Z
+                if (checkWinner('Z')) {
+                    endGame('Z');
+                    return;
+                }
+                
+                if (isBoardFull()) {
+                    endGame('Draw');
+                    return;
+                }
+                
+                // Back to player
+                currentPlayer = 'X';
+                updateGameInfo();
+                renderBoard();
+                document.getElementById('game-message').textContent = '';
+            }
+        }
+
+        // Get best move for system using minimax with alpha-beta pruning
+        function getBestMove(systemPlayer, otherSystemPlayer) {
+            let bestScore = -Infinity;
+            let bestMove = -1;
+
+            for (let i = 0; i < gameBoard.length; i++) {
+                if (gameBoard[i] === '') {
+                    gameBoard[i] = systemPlayer;
+                    let score = minimax(gameBoard, 0, false, systemPlayer, otherSystemPlayer, -Infinity, Infinity);
+                    gameBoard[i] = '';
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+
+            return bestMove;
+        }
+
+        // Minimax algorithm with alpha-beta pruning and depth limit
+        function minimax(board, depth, isMaximizing, systemPlayer, otherSystemPlayer, alpha, beta, maxDepth = 4) {
+            // Limit depth for performance on larger board
+            if (depth > maxDepth) {
+                return evaluateBoard(board, systemPlayer);
+            }
+
+            let result = checkWinnerQuick(board);
+
+            if (result === 'X') return -10 + depth;
+            if (result === systemPlayer) return 10 - depth;
+            if (result === otherSystemPlayer) return 8 - depth;
+            if (result === 'Draw') return 0;
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = systemPlayer;
+                        let score = minimax(board, depth + 1, false, systemPlayer, otherSystemPlayer, alpha, beta, maxDepth);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                        alpha = Math.max(alpha, bestScore);
+                        if (beta <= alpha) break;
+                    }
+                }
+                return bestScore === -Infinity ? 0 : bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true, systemPlayer, otherSystemPlayer, alpha, beta, maxDepth);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                        beta = Math.min(beta, bestScore);
+                        if (beta <= alpha) break;
+                    }
+                }
+                return bestScore === Infinity ? 0 : bestScore;
+            }
+        }
+
+        // Quick board evaluation for leaf nodes
+        function evaluateBoard(board, systemPlayer) {
+            let score = 0;
+            
+            for (let combo of winningCombinations) {
+                const line = combo.map(i => board[i]);
+                
+                // System player winning potential
+                const systemCount = line.filter(x => x === systemPlayer).length;
+                const emptyCount = line.filter(x => x === '').length;
+                
+                if (systemCount === 2 && emptyCount === 1) {
+                    score += 5;
+                }
+                if (systemCount === 1 && emptyCount === 2) {
+                    score += 1;
+                }
+                
+                // Player threat
+                const playerCount = line.filter(x => x === 'X').length;
+                if (playerCount === 2 && emptyCount === 1) {
+                    score += 4;
+                }
+                if (playerCount === 1 && emptyCount === 2) {
+                    score += 0.5;
+                }
+            }
+            
+            return score;
+        }
+
+        // Check winner quickly
+        function checkWinnerQuick(board) {
+            for (let combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            return null;
+        }
+
+        // Check winner and get winning combo
+        function checkWinner(player) {
+            for (let combo of winningCombinations) {
+                const [a, b, c] = combo;
+                if (gameBoard[a] === player && gameBoard[a] === gameBoard[b] && gameBoard[a] === gameBoard[c]) {
+                    winningCombo = combo;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // Check if board is full
+        function isBoardFull() {
+            return gameBoard.every(cell => cell !== '');
+        }
+
+        // End game
+        function endGame(winner) {
+            gameActive = false;
+            gameResult = winner;
+            
+            if (winner === 'X') {
+                document.getElementById('result-box').textContent = '🎉 You Won!';
+                document.getElementById('result-box').style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+                document.getElementById('result-message').textContent = 'Congratulations! You defeated the System!';
+                document.getElementById('result-message').className = 'result-message win';
+                document.getElementById('result-details').innerHTML = `
+                    <p>Excellent strategy! You managed to outwit the System's dual-symbol defense on the expanded 5×5 board.</p>
+                    <div class="winning-combo">Winning Combination: X at positions ${winningCombo.join(', ')}</div>
+                `;
+            } else if (winner === 'O') {
+                document.getElementById('result-box').textContent = '🤖 System Won (O)!';
+                document.getElementById('result-box').style.background = 'linear-gradient(135deg, #dc3545 0%, #e74c3c 100%)';
+                document.getElementById('result-message').textContent = 'The System defeated you with O!';
+                document.getElementById('result-message').className = 'result-message lose';
+                document.getElementById('result-details').innerHTML = `
+                    <p>The System completed three O's in a row. Better luck next time!</p>
+                    <div class="winning-combo">Winning Combination: O at positions ${winningCombo.join(', ')}</div>
+                `;
+            } else if (winner === 'Z') {
+                document.getElementById('result-box').textContent = '🤖 System Won (Z)!';
+                document.getElementById('result-box').style.background = 'linear-gradient(135deg, #dc3545 0%, #e74c3c 100%)';
+                document.getElementById('result-message').textContent = 'The System defeated you with Z!';
+                document.getElementById('result-message').className = 'result-message lose';
+                document.getElementById('result-details').innerHTML = `
+                    <p>The System completed three Z's in a row. Better luck next time!</p>
+                    <div class="winning-combo">Winning Combination: Z at positions ${winningCombo.join(', ')}</div>
+                `;
+            } else {
+                document.getElementById('result-box').textContent = '🤝 Draw!';
+                document.getElementById('result-box').style.background = 'linear-gradient(135deg, #ffc107 0%, #ff9800 100%)';
+                document.getElementById('result-message').textContent = 'It\'s a tie! Great effort against two AI opponents!';
+                document.getElementById('result-message').className = 'result-message draw';
+                document.getElementById('result-details').innerHTML = `
+                    <p>The board filled up with no winner. Excellent defense on the 5×5 grid!</p>
+                `;
+            }
+
+            renderFinalBoard();
+            showPage('results-page');
+        }
+
+        // Render final board on results page
+        function renderFinalBoard() {
+            const finalBoard = document.getElementById('final-board');
+            finalBoard.innerHTML = '';
+
+            gameBoard.forEach((cell, index) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'final-cell';
+                if (cell === 'O') {
+                    cellDiv.classList.add('o');
+                } else if (cell === 'Z') {
+                    cellDiv.classList.add('z');
+                }
+                if (winningCombo && winningCombo.includes(index)) {
+                    cellDiv.classList.add('winning');
+                }
+                cellDiv.textContent = cell;
+                finalBoard.appendChild(cellDiv);
+            });
+        }
+
+        // Update game info
+        function updateGameInfo() {
+            const turnElement = document.getElementById('current-turn');
+            const statusElement = document.getElementById('game-status');
+            
+            if (currentPlayer === 'X') {
+                turnElement.textContent = 'Your Move (X)';
+            } else if (currentPlayer === 'O') {
+                turnElement.textContent = 'System (O)';
+            } else if (currentPlayer === 'Z') {
+                turnElement.textContent = 'System (Z)';
+            }
+            
+            statusElement.textContent = `${moveCount} / 25`;
+        }
+
+        // Navigation functions
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function goBack() {
+            showPage('instructions-page');
+        }
+
+        function playAgain() {
+            startGame();
+        }
+
+        function backToInstructions() {
+            showPage('instructions-page');
+        }
+    </script>
+</body>
+</html>
